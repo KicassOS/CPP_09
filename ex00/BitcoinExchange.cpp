@@ -6,7 +6,7 @@
 /*   By: pszleper <pszleper@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 04:36:20 by pszleper          #+#    #+#             */
-/*   Updated: 2023/10/26 06:02:42 by pszleper         ###   ########.fr       */
+/*   Updated: 2023/11/09 09:45:00 by pszleper         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ BitcoinExchange::BitcoinExchange(void)
 
 BitcoinExchange::BitcoinExchange(std::ifstream& dataFile)
 {
-	size_t							datePart, comma;
+	size_t							datePart = 0, comma = 0;
 	std::pair<std::string, float>	rateAndText;
-	std::string						eachLine, date, rate = "";
+	std::string						eachLine = "", date = "", rate = "";
 
 	std::getline(dataFile, eachLine); // skip first line
 	while (std::getline(dataFile, eachLine))
@@ -33,7 +33,7 @@ BitcoinExchange::BitcoinExchange(std::ifstream& dataFile)
 		if (!datePart)
 		{
 			_data.clear();
-			std::cout << "Error: invalid input: " << date << std::endl;
+			std::cout << "Error: bad input => " << date << std::endl;
 			return ;
 		}
 		rateAndText = checkValue(rate);
@@ -49,9 +49,8 @@ BitcoinExchange::BitcoinExchange(std::ifstream& dataFile)
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange& other)
 {
-	for (std::map<unsigned int, float>::const_iterator it = other._data.begin();
-		it != other._data.end(); ++it)
-			this->_data[it->first] = it->second;
+	for (std::map<unsigned int, float>::const_iterator it = other._data.begin(); it != other._data.end(); ++it)
+		this->_data[it->first] = it->second;
 }
 
 BitcoinExchange&	BitcoinExchange::operator=(const BitcoinExchange& other)
@@ -59,9 +58,8 @@ BitcoinExchange&	BitcoinExchange::operator=(const BitcoinExchange& other)
 	if (this != &other)
 	{
 		this->_data.clear();
-		for (std::map<unsigned int, float>::const_iterator it = other._data.begin();
-			it != other._data.end(); ++it)
-				this->_data[it->first] = it->second;
+		for (std::map<unsigned int, float>::const_iterator it = other._data.begin(); it != other._data.end(); ++it)
+			this->_data[it->first] = it->second;
 	}
 	return *this;
 }
@@ -70,18 +68,27 @@ BitcoinExchange::~BitcoinExchange(void)
 {
 }
 
+void	BitcoinExchange::trimStr(std::string& lineStr)
+{
+	size_t  begin = lineStr.find_first_not_of(" \f\n\r\t\v");
+	lineStr.erase(0, begin);
+	size_t  end = lineStr.find_last_not_of(" \f\n\r\t\v");
+	lineStr.erase(end + 1);
+}
+
 unsigned int	BitcoinExchange::calculateDays(int year, int month, int day)
 {
-	int february = 28 + (((year < 1582) && (year % 4 == 0)) ||
-		((year >= 1582) && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)));
+	// During leap years, which occur every 4 years, we add an extra day, Leap Day, on 29 February
+	// 1582 is the year the Gregorian calendar was adopted
+	// The Gregorian calendar differs from the Julian only in that no century year (1800, 1900 etc..) is a leap year unless it is exactly divisible by 400
+	int february = 28 + (((year < 1582) && (year % 4 == 0)) || ((year >= 1582) && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)));
 	int months[12] = {31, february, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	int accumulate = std::accumulate(months, months + (month - 1), 0);
 	int daysTillDate = accumulate + day;
-	
+
 	unsigned int	leapYears = 0;
 	for (int i = 1; i < year; ++i)
-		leapYears += (((year < 1582) && (i % 4 == 0)) ||
-			((year >= 1582) && ((i % 4 == 0 && i % 100 != 0) || i % 400 == 0)));
+		leapYears += (((year < 1582) && (i % 4 == 0)) || ((year >= 1582) && ((i % 4 == 0 && i % 100 != 0) || i % 400 == 0)));
 	unsigned int	daysCalculated = leapYears + 365 * (year - 1) + daysTillDate; 
 		return (daysCalculated);
 }
@@ -89,9 +96,8 @@ unsigned int	BitcoinExchange::calculateDays(int year, int month, int day)
 unsigned int	BitcoinExchange::checkDate(const std::string& dateStr)
 {
 	size_t  forbiddenChars = dateStr.find_first_not_of("-0123456789");
-	if (dateStr.length() != 10 || forbiddenChars != std::string::npos ||
-		dateStr[4] != '-' || dateStr[7] != '-')
-	return 0;
+	if (dateStr.length() != 10 || forbiddenChars != std::string::npos || dateStr[4] != '-' || dateStr[7] != '-')
+	return (0);
 
 	std::string			yyyy = dateStr.substr(0, 4);
 	std::istringstream	yearStream(yyyy);
@@ -100,21 +106,22 @@ unsigned int	BitcoinExchange::checkDate(const std::string& dateStr)
 	std::string			dd = dateStr.substr(8, 2);
 	std::istringstream	dayStream(dd);
 
-	int Year, Month, Day;
-	yearStream>>Year;
-	monthStream>>Month;
-	dayStream>>Day;
-	if (Year < 1 || Month < 1 || Month > 12 || Day < 1 || Day > 31)
+	int year, month, day;
+	yearStream>>year;
+	monthStream>>month;
+	dayStream>>day;
+
+	if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31)
 		return (0);
+
 	int daysInMonth = 31;
-	if (Month == 4 || Month == 6 || Month == 9 || Month == 11)
+	if (month == 4 || month == 6 || month == 9 || month == 11)
 		daysInMonth = 30;
-	else if (Month == 2)
-		daysInMonth = 28 + (((Year < 1582) && (Year % 4 == 0)) ||
-		((Year >= 1582) && ((Year % 4 == 0 && Year % 100 != 0) || Year % 400 == 0)));
-	if (Day > daysInMonth)
+	else if (month == 2)
+		daysInMonth = 28 + (((year < 1582) && (year % 4 == 0)) || ((year >= 1582) && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)));
+	if (day > daysInMonth)
 		return (0);
-	return calculateDays(Year, Month, Day);
+	return calculateDays(year, month, day);
 }
 
 std::pair<std::string, float>	BitcoinExchange::checkValue(const std::string& valueStr)
@@ -130,23 +137,23 @@ std::pair<std::string, float>	BitcoinExchange::checkValue(const std::string& val
 		long long integerValue;
 		valueStream >> integerValue;
 		if (integerValue > INT_MAX)
-			return std::make_pair("Error: number too large\n", 0.0);
+			return std::make_pair("Error: too large a number.\n", 0.0);
 		if (integerValue < INT_MIN)
-			return std::make_pair("Error: number too small\n", 0.0);
+			return std::make_pair("Error: number too small.\n", 0.0);
 		if (integerValue < 0)
-			return std::make_pair("Error: not a positive number\n", 0.0);
+			return std::make_pair("Error: not a positive number.\n", 0.0);
 		return std::make_pair("valid", static_cast<float>(integerValue));
 	}
 	char*	end;
 	float	floatValue = strtof(valueStr.c_str(), &end);
 	if (*end != '\0')
-		return std::make_pair("Error: invalid number\n", 0.0);
+		return std::make_pair("Error: invalid number.\n", 0.0);
 	if (floatValue == HUGE_VALF)
-		return std::make_pair("Error: number too large\n", 0.0);
+		return std::make_pair("Error: too large a number.\n", 0.0);
 	if (floatValue < -HUGE_VALF)
-		return std::make_pair("Error: number too small\n", 0.0);
+		return std::make_pair("Error: number too small.\n", 0.0);
 	if (floatValue < 0)
-		return std::make_pair("Error: not a positive number\n", 0.0);
+		return std::make_pair("Error: not a positive number.\n", 0.0);
 	return std::make_pair("valid", floatValue);
 }
 
@@ -188,22 +195,14 @@ void	BitcoinExchange::displayResult(std::ifstream& inputFile)
 						std::cout << date << std::endl;
 				}
 				else if (valueAndText.second > 1000)
-					std::cout << "Error: price is greater than 1000" << value << std::endl;
+					std::cout << "Error: price is greater than 1000: " << value << std::endl;
 				else
 				{
-					std::cout << date << " : " << valueAndText.second << " = " << valueAndText.second * (it->second) << std::endl;
+					std::cout << date << " => " << valueAndText.second << " = " << valueAndText.second * (it->second) << std::endl;
 				}
 			}
 		}
 		else
-			std::cout << "Error: invalid input: " << date << std::endl;
+			std::cout << "Error: bad input => " << date << std::endl;
 	}
-}
-
-void	BitcoinExchange::trimStr(std::string& lineStr)
-{
-	size_t  begin = lineStr.find_first_not_of(" \f\n\r\t\v");
-	lineStr.erase(0, begin);
-	size_t  end = lineStr.find_last_not_of(" \f\n\r\t\v");
-	lineStr.erase(end + 1);
 }
