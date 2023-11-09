@@ -6,7 +6,7 @@
 /*   By: pszleper <pszleper@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 04:36:37 by pszleper          #+#    #+#             */
-/*   Updated: 2023/10/26 07:04:17 by pszleper         ###   ########.fr       */
+/*   Updated: 2023/11/08 15:09:10 by pszleper         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ PmergeMe::~PmergeMe(void)
 
 void	PmergeMe::fillContainer(std::string& numSequence)
 {
-	long long	integer;
+	long long	integer = 0;
 	size_t		forbiddenChars = numSequence.find_first_not_of(" +0123456789");
 	if (forbiddenChars != std::string::npos)
 		throw std::domain_error("Error");

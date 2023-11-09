@@ -6,13 +6,13 @@
 /*   By: pszleper <pszleper@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 04:36:35 by pszleper          #+#    #+#             */
-/*   Updated: 2023/10/26 06:49:13 by pszleper         ###   ########.fr       */
+/*   Updated: 2023/11/09 07:21:04 by pszleper         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PmergeMe.hpp"
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
 	std::string	numSequence;
 	for (int i = 1; i < argc; ++i)
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const std::exception& e)
 	{
-		std::cout<<e.what()<<std::endl;
+		std::cout << e.what() << std::endl;
 		return 1;
 	}
 
@@ -49,15 +49,15 @@ int main(int argc, char* argv[])
 	gettimeofday(&time, NULL);
 	long long	listAfter = time.tv_sec * 1000000LL + time.tv_usec; // in microseconds
 
-	std::cout << "After: ";
+	std::cout << "After : ";
 	obj.displayList(10); 
 
 	std::cout << "Time to process a range of " << obj.getVectorSize();
-	std::cout << " elements with std::vector :  ";
+	std::cout << " elements with std::vector: ";
 	std::cout << (vectorAfter - vectorBefore) / 1000.0 << " us" << std::endl;
 
 	std::cout << "Time to process a range of " << obj.getListSize();
-	std::cout << " elements with std::list :  ";
+	std::cout << " elements with std::list:   ";
 	std::cout << (listAfter - listBefore) / 1000.0<<" us" << std::endl;
 	return (0);
 }
