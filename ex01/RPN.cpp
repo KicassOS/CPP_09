@@ -6,7 +6,7 @@
 /*   By: pszleper <pszleper@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 04:36:30 by pszleper          #+#    #+#             */
-/*   Updated: 2023/10/26 06:02:11 by pszleper         ###   ########.fr       */
+/*   Updated: 2023/11/09 09:34:00 by pszleper         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ RPN::~RPN(void)
 
 void	RPN::calculate(std::string expression)
 {
-	int operand1, operand2 = 0;
+	int operand1 = 0, operand2 = 0;
 	size_t	length = expression.length();
 
 	for (size_t i = 0; i < length; i++)
